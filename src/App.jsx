@@ -1,35 +1,44 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
+import axios from "axios";
+
+// Components
 import Users from "./components/Users.jsx";
 import UserData from "./components/UserData.jsx";
 import UserForm from "./components/UserForm.jsx";
-import axios from "axios";
+
+// Redux
+import { useSelector, useDispatch } from "react-redux";
+import { setUsers, addUser, updateUser, deleteUser } from "./store/usersSlice";
 
 function App() {
-  const [users, setUsers] = useState([]);
+  const dispatch = useDispatch();
+  const users = useSelector((state) => state.users.users);
 
+  // Fetch users from API + localStorage
   useEffect(() => {
     const localUsers = JSON.parse(localStorage.getItem("users")) || [];
     axios
       .get("https://jsonplaceholder.typicode.com/users")
-      .then((res) => setUsers([...localUsers, ...res.data]))
+      .then((res) => {
+        const allUsers = [...localUsers, ...res.data];
+        dispatch(setUsers(allUsers));
+      })
       .catch((err) => console.error(err));
-  }, []);
+  }, [dispatch]);
 
-  const addUser = (user) => {
+  // Add user
+  const handleAddUser = (user) => {
     const newUser = { id: Date.now(), ...user };
-    const updatedUsers = [newUser, ...users];
-    setUsers(updatedUsers);
+    dispatch(addUser(newUser));
+
     const localUsers = JSON.parse(localStorage.getItem("users")) || [];
     localStorage.setItem("users", JSON.stringify([newUser, ...localUsers]));
   };
 
-  const updateUser = (id, updatedUser) => {
-    const newUsers = users.map((u) =>
-      u.id === id ? { ...u, ...updatedUser } : u
-    );
-    setUsers(newUsers);
+  // Update user
+  const handleUpdateUser = (id, updatedUser) => {
+    dispatch(updateUser({ id, ...updatedUser }));
 
     const localUsers = JSON.parse(localStorage.getItem("users")) || [];
     const updatedLocal = localUsers.map((u) =>
@@ -38,9 +47,9 @@ function App() {
     localStorage.setItem("users", JSON.stringify(updatedLocal));
   };
 
-  const deleteUser = (id) => {
-    const newUsers = users.filter((u) => u.id !== id);
-    setUsers(newUsers);
+  // Delete user
+  const handleDeleteUser = (id) => {
+    dispatch(deleteUser(id));
 
     const localUsers = JSON.parse(localStorage.getItem("users")) || [];
     const updatedLocal = localUsers.filter((u) => u.id !== id);
@@ -50,6 +59,7 @@ function App() {
   return (
     <BrowserRouter>
       <div className="d-flex" style={{ minHeight: "100vh" }}>
+        {/* Sidebar */}
         <div
           className="bg-dark text-white p-3"
           style={{ width: "250px", minHeight: "100vh" }}
@@ -70,17 +80,23 @@ function App() {
         </div>
 
         <div className="flex-grow-1 p-4">
-          <h1 className="mb-4">User Management App </h1>
+          <h1 className="mb-3">User Management App</h1>
           <Routes>
-            <Route path="/users" element={<Users users={users} />} />
-            <Route path="/users/add" element={<UserForm addUser={addUser} />} />
+            <Route
+              path="/users"
+              element={<Users users={users} deleteUser={handleDeleteUser} />}
+            />
+            <Route
+              path="/users/add"
+              element={<UserForm addUser={handleAddUser} />}
+            />
             <Route
               path="/users/:id"
-              element={<UserData users={users} deleteUser={deleteUser} />}
+              element={<UserData users={users} deleteUser={handleDeleteUser} />}
             />
             <Route
               path="/users/edit/:id"
-              element={<UserForm users={users} updateUser={updateUser} />}
+              element={<UserForm users={users} updateUser={handleUpdateUser} />}
             />
           </Routes>
         </div>
