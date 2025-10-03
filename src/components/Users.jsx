@@ -1,41 +1,59 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import UserForm from "./UserForm.jsx";
+import axios from "axios";
 
-function Users({ users, addUser }) {
+const Users = () => {
+  const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
 
+  useEffect(() => {
+    const localUsers = JSON.parse(localStorage.getItem("users")) || [];
+    axios
+      .get("https://jsonplaceholder.typicode.com/users")
+      .then((res) => setUsers([...localUsers, ...res.data]))
+      .catch((err) => console.log(err));
+  }, []);
+
   const filteredUsers = users.filter(
-    (u) =>
-      u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase())
+    (user) =>
+      user.name.toLowerCase().includes(search.toLowerCase()) ||
+      user.email.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div>
-      <UserForm addUser={addUser} />
-
+    <div className="container mt-3">
       <input
         type="text"
-        placeholder="Search by name or email"
         className="form-control mb-3"
+        placeholder="Search by name or email"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
-
-      <div className="list-group">
+      <div className="row">
         {filteredUsers.map((user) => (
-          <Link
-            key={user.id}
-            to={`/user/${user.id}`}
-            className="list-group-item list-group-item-action"
-          >
-            <strong>{user.name}</strong> - {user.email} ({user.company?.name})
-          </Link>
+          <div key={user.id} className="col-md-4 mb-3">
+            <div className="card shadow-sm">
+              <div className="card-body">
+                <h5 className="card-title">{user.name}</h5>
+                <p className="card-text">{user.email}</p>
+                {user.company && (
+                  <p className="card-text">
+                    <small>{user.company.name}</small>
+                  </p>
+                )}
+                <Link
+                  to={`/users/${user.id}`}
+                  className="btn btn-primary btn-sm"
+                >
+                  View Details
+                </Link>
+              </div>
+            </div>
+          </div>
         ))}
       </div>
     </div>
   );
-}
+};
 
 export default Users;
