@@ -53,7 +53,6 @@ const UserForm = ({ users, addUser, updateUser }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Nested fields
     if (name.startsWith("address.")) {
       const key = name.split(".")[1];
       setFormData((prev) => ({

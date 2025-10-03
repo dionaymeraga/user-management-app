@@ -26,7 +26,6 @@ const Users = ({ users }) => {
 
   const handleDelete = (id) => {
     dispatch(deleteUser(id));
-
     const localUsers = JSON.parse(localStorage.getItem("users")) || [];
     const updatedLocal = localUsers.filter((u) => u.id !== id);
     localStorage.setItem("users", JSON.stringify(updatedLocal));
@@ -34,7 +33,7 @@ const Users = ({ users }) => {
 
   return (
     <div>
-      <div className="mb-3 d-flex gap-2">
+      <div className="mb-3 d-flex gap-2 flex-wrap align-items-center">
         <input
           type="text"
           className="form-control"
@@ -55,14 +54,15 @@ const Users = ({ users }) => {
         </select>
 
         <button
-          className="btn btn-secondary"
+          className="btn btn-secondary d-flex align-items-center gap-1"
           onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
         >
-          {sortOrder === "asc" ? "Ascending" : "Descending"}
+          <i className="bi bi-filter"></i>
+          <span>{sortOrder === "asc" ? "A-Z" : "Z-A"}</span>
         </button>
       </div>
 
-      <div className="row">
+      <div className="user-cards row">
         {sortedUsers.map((user) => (
           <div key={user.id} className="col-md-6 col-lg-4 mb-3">
             <div className="card h-100">
@@ -72,21 +72,23 @@ const Users = ({ users }) => {
                   <strong>Email:</strong> {user.email} <br />
                   <strong>Company:</strong> {user.company?.name || "-"}
                 </p>
-                <Link to={`/users/${user.id}`} className="btn btn-primary me-2">
-                  View
-                </Link>
-                <Link
-                  to={`/users/edit/${user.id}`}
-                  className="btn btn-warning me-2"
-                >
-                  Edit
-                </Link>
-                <button
-                  className="btn btn-danger"
-                  onClick={() => handleDelete(user.id)}
-                >
-                  Delete
-                </button>
+
+                <div className="d-flex gap-2 flex-wrap">
+                  <Link to={`/users/${user.id}`} className="btn btn-view">
+                    <i className="bi bi-eye"></i> View
+                  </Link>
+
+                  <Link to={`/users/edit/${user.id}`} className="btn btn-edit">
+                    <i className="bi bi-pencil"></i> Edit
+                  </Link>
+
+                  <button
+                    className="btn btn-delete"
+                    onClick={() => handleDelete(user.id)}
+                  >
+                    <i className="bi bi-trash"></i> Delete
+                  </button>
+                </div>
               </div>
             </div>
           </div>

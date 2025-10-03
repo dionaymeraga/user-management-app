@@ -12,7 +12,7 @@ const Dashboard = () => {
               to="/users"
               className="d-flex align-items-center mb-3 text-white text-decoration-none w-100 justify-content-center justify-content-sm-start"
             >
-              <span className="fs-5 fw-bolder text-center d-none d-sm-inline">
+              <span className="fs-5 fw-bolder text-center d-none d-sm-inline align-items-center">
                 User Management App
               </span>
             </Link>
